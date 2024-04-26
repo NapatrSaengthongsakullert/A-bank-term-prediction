@@ -1,1 +1,5 @@
-
+# Packages needed to run this project
+Numpy
+Pandas
+Matplotlib
+Seaborn
