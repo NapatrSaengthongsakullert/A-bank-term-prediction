@@ -1,5 +1,11 @@
 # Default ignored files
 /shelf/
-/workspace.xml
+workspace.xml
+misc.xml
+modules.xml
+profiles_settings.xml
+vcs.xml
+A-bank-term-prediction.iml
+
 
 LICENSE
