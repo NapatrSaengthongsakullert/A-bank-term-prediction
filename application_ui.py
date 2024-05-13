@@ -1,156 +1,11 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
-import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from PIL import Image, ImageTk
-import seaborn as sns
+from application_cal import Graph,Database
 
 pad = {'padx': 5, 'pady': 5}
 
-class Graph():
-    def __init__(self):
-        self.df = pd.read_csv("test.csv")
-
-    def create_graph(self, value, parent_value):
-        fig = Figure(figsize=(5, 4), dpi=100)
-        plot = fig.add_subplot(111)
-        if value == "age":
-            bins = [num for num in range(0, 110, 10)]
-            labels = ['10', '20', '30', '40', '50', '60', '70', '80', '90', '100']
-            self.df['age_group'] = pd.cut(self.df['age'], bins=bins, labels=labels, right=False)
-            age_group_counts = self.df['age_group'].value_counts().sort_index()
-            plot.bar(age_group_counts.index, age_group_counts.values, color='grey')
-            plot.set_xlabel('age')
-            plot.set_ylabel('frequency')
-            plot.set_title('Frequency of Age')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-        elif value == 'balance':
-            bins = [num for num in range(-3000, 39000, 3000)]
-            labels = ['0', '3k', '6k', '9k', '12k', '15k',
-                      '18k', '21k', '24k', '27k', '30k',
-                      '33k', '36k']
-            self.df['balance_group'] = pd.cut(self.df['balance'], bins=bins, labels=labels, right=False)
-            balance_group_counts = self.df['balance_group'].value_counts().sort_index()
-            plot.bar(balance_group_counts.index, balance_group_counts.values, color='grey')
-            plot.set_xlabel('balance')
-            plot.set_ylabel('frequency')
-            plot.set_title('Frequency of Balance')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-        elif value == 'poutcome':
-            poutcome_group_counts = self.df['poutcome'].value_counts().sort_index()
-            plot.bar(poutcome_group_counts.index, poutcome_group_counts.values, color='grey')
-            plt.xlabel('Previous campaign outcome')
-            plt.ylabel('Frequency')
-            plt.title('Frequency of Previous outcome')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-        elif value == 'education':
-            education_group_counts = self.df['education'].value_counts().sort_index()
-            plot.bar(education_group_counts.index, education_group_counts.values, color='grey')
-            plt.xlabel('Education Level')
-            plt.ylabel('Frequency')
-            plt.title('Frequency of Education Levels')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-        elif value == 'default':
-            default_counts = self.df['default'].value_counts()
-            fig, ax = plt.subplots()
-            max_value_index = default_counts.idxmax()
-            colors = ['orange' if index == max_value_index else 'grey' for index in default_counts.index]
-
-            ax.pie(default_counts, labels=default_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
-            ax.axis('equal')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-        elif value == 'housing':
-            housing_counts = self.df['housing'].value_counts()
-            fig, ax = plt.subplots()
-            max_value_index = housing_counts.idxmax()
-            colors = ['orange' if index == max_value_index else 'grey' for index in housing_counts.index]
-
-            ax.pie(housing_counts, labels=housing_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
-            ax.axis('equal')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-        elif value == 'loan':
-            loan_counts = self.df['loan'].value_counts()
-            fig, ax = plt.subplots()
-            max_value_index = loan_counts.idxmax()
-            colors = ['orange' if index == max_value_index else 'grey' for index in loan_counts.index]
-
-            ax.pie(loan_counts, labels=loan_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
-            ax.axis('equal')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5, sticky='news')
-
-    def create_graph_stat(self ,value, parent_value):
-        self.selected_column = self.df[['age', 'balance']].copy()
-        if value == 'BarPlot':
-            fig, ax = plt.subplots()
-            ax.bar(self.selected_column['age'], self.selected_column['balance'])
-            ax.set_xlabel('Age')
-            ax.set_ylabel('Balance')
-            ax.set_title('Bar Plot of Age vs. Balance')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0,column=0, **pad, sticky='news')
-        elif value == 'Heatmap':
-            fig, ax = plt.subplots()
-            sns.heatmap(self.selected_column.corr(), annot=True, cmap='coolwarm', ax=ax)
-            ax.set_title('Heatmap of Age vs. Balance')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0,column=0, **pad, sticky='news')
-        elif value == 'ScatterPlot':
-            fig, ax = plt.subplots()
-            ax.scatter(self.selected_column['age'], self.selected_column['balance'])
-            ax.set_xlabel('Age')
-            ax.set_ylabel('Balance')
-            ax.set_title('Scatter Plot of Age vs. Balance')
-            canvas = FigureCanvasTkAgg(fig, master=parent_value)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0,column=0, **pad, sticky='news')
-
-
-class Database():
-    def __init__(self, file):
-        self.df = pd.read_csv(file)
-
-    def add_client(self, age, balance, ncon, job, marital, edu, cont, pout, d, h, l):
-        num = len(self.df) + 1
-        # สร้าง DataFrame ที่จะเพิ่มเข้าไป
-        new_row = {'ID': num, 'age': age, 'balance': balance, 'previous': ncon, 'job': job, 'marital': marital,
-                   'education': edu, 'contact': cont, 'poutcome': pout, 'default': d, 'housing': h, 'loan': l}
-        # สร้าง DataFrame จากแถวใหม่ที่จะเพิ่ม
-        new_df = pd.DataFrame(new_row, index=[0])
-        # เพิ่มแถวใหม่ใน DataFrame โดยใช้ pd.concat()
-        df = pd.concat([self.df, new_df], ignore_index=True)
-        # บันทึก DataFrame กลับเป็นไฟล์ CSV
-        df.to_csv('test.csv', index=False)
-
-    def remove_client(self, index):
-        df = self.df.drop(int(index)-1)
-        df = df.reset_index(drop=True)
-        df['ID'] = df.index + 1
-        df.to_csv('test.csv', index=False)
-
-    # def config_client(self):
-    #     pass
-
-    # def filter(self):
-    #     pass
 
 class Application(tk.Tk):
     """Main application class for the Bank Application GUI."""
@@ -160,8 +15,8 @@ class Application(tk.Tk):
         super().__init__()
         self.title("Bank Application")
         self.configure(bg="white")
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=4)
+        self.rowconfigure(0, weight=7)
+        self.rowconfigure(1, weight=3)
         self.columnconfigure(0, weight=1)
         self.df = pd.read_csv("test.csv")
         self.personal_frame = None
@@ -176,6 +31,12 @@ class Application(tk.Tk):
         for widget in frame.winfo_children():
             if isinstance(widget, tk.Canvas):
                 widget.destroy()
+
+    def on_clear(self):
+        """Destroy canvas widgets within a frame."""
+        self.destroy_canvas(self.graph_sub_frame)
+        self.destroy_canvas(self.graph_sub_frame2)
+        self.destroy_canvas(self.static_info_sub_frame_sub)
 
     def check_personal_id(self, event):
         """Check if the entered personal ID is valid."""
@@ -194,6 +55,10 @@ class Application(tk.Tk):
         f'\njob: {row_data['job']} with balance ≈ {row_data['balance']}'
         f'\ndebt status: housing= {row_data['housing']}, loan= {row_data['loan']}, default= {row_data['default']}'
         f'\ncontact type: {row_data['contact']} previous outcome= {row_data['poutcome']}')
+        temp_df = self.db.related_client(user_id)
+        dataframe_string = temp_df.to_string(index=False)
+        self.relative_client_info.delete('1.0',tk.END)
+        self.relative_client_info.insert(tk.END, dataframe_string)
 
     def on_select_personal_hist(self, parent_value):
         """Display histogram based on selected attribute."""
@@ -251,8 +116,8 @@ class Application(tk.Tk):
                                                  bg='white')
             personal_label_frame.rowconfigure(0, weight=1)
             personal_label_frame.columnconfigure(0, weight=1)
-            personal_label_frame.columnconfigure(1, weight=1)
-            personal_label_frame.columnconfigure(2, weight=1)
+            personal_label_frame.columnconfigure(1, weight=2)
+            personal_label_frame.columnconfigure(2, weight=2)
             personal_label_frame.columnconfigure(3, weight=1)
             label = tk.Label(personal_label_frame, text="Please enter client's id: ", bg='white')
             self.personal_id = tk.Entry(personal_label_frame)
@@ -260,11 +125,11 @@ class Application(tk.Tk):
             self.client_info = tk.StringVar()
             client_info_label = tk.Label(personal_label_frame, textvariable=self.client_info, bg='white')
             self.search_button = tk.Button(personal_label_frame, text='Search', bg='white', state='disabled', command=self.on_click_search)
-            label.grid(row=0, column=0, **pad, sticky='nws')
-            self.personal_id.grid(row=0, column=1, **pad, sticky='news')
+            label.grid(row=0, column=0, **pad, sticky='ew')
+            self.personal_id.grid(row=0, column=1, **pad, sticky='ew')
             client_info_label.grid(row=0, column=2, **pad, sticky='nws')
-            self.search_button.grid(row=0, column=3, **pad, sticky='news')
-            personal_label_frame.grid(row=0, column=0, columnspan=2, **pad, sticky='new')
+            self.search_button.grid(row=0, column=3, **pad, sticky='ew')
+            personal_label_frame.grid(row=0, column=0, columnspan=2, **pad, sticky='ew')
             self.personal_frame.grid(row=1, column=0, **pad, sticky='news')
 
             self.personal_labelframe = tk.LabelFrame(self.personal_frame, bg='white')
@@ -300,12 +165,19 @@ class Application(tk.Tk):
             self.personal_sub_frame2.rowconfigure(0, weight=1)
             self.personal_sub_frame2.columnconfigure(0, weight=1)
 
-            relative_client_info = tk.Text(self.personal_frame, wrap=tk.NONE)
+            most_related_frame = tk.LabelFrame(self.personal_frame, bg='white', text='Most related client', labelanchor='nw')
+            most_related_frame.rowconfigure(0,weight=1)
+            most_related_frame.columnconfigure(0, weight=1)
+            self.relative_client_info = scrolledtext.ScrolledText(most_related_frame, wrap=tk.NONE)
+            scroll_bar = tk.Scrollbar(most_related_frame, orient="horizontal", command=self.relative_client_info.xview)
+            self.relative_client_info.configure(xscrollcommand=scroll_bar.set)
+            self.relative_client_info.grid(row=1,column=0, **pad, sticky='news')
+            scroll_bar.grid(row=0,column=0, **pad, sticky='news')
             self.personal_labelframe.grid(row=1, column=0, **pad, sticky='news')
             self.personal_labelframe2.grid(row=1, column=1, **pad, sticky='news')
             self.personal_sub_frame.grid(row=2, column=0, **pad, sticky='news')
             self.personal_sub_frame2.grid(row=2, column=1, **pad, sticky='news')
-            relative_client_info.grid(row=3, column=0, columnspan=2, **pad, stick='news')
+            most_related_frame.grid(row=3, column=0, columnspan=2, **pad, stick='news')
 
     def graphframe_creating(self):
         """Create graph frame."""
@@ -318,8 +190,9 @@ class Application(tk.Tk):
                 self.personal_frame = None
             self.graph_frame = tk.Frame(self, bg='white')
             self.graph_frame.rowconfigure(0, weight=1)
-            self.graph_frame.rowconfigure(1, weight=2)
+            self.graph_frame.rowconfigure(1, weight=1)
             self.graph_frame.rowconfigure(2, weight=1)
+            self.graph_frame.rowconfigure(3, weight=1)
             self.graph_frame.columnconfigure(0, weight=1)
             self.graph_frame.columnconfigure(1, weight=1)
 
@@ -398,6 +271,9 @@ class Application(tk.Tk):
             self.static_info.grid(row=2,column=0,columnspan=2,**pad,sticky='news')
             self.graph_frame.grid(row=1,column=0,**pad,sticky='news')
 
+            clear_button = tk.Button(self.graph_frame, text='Clear', command=self.on_clear)
+            clear_button.grid(row=3,column=1,**pad,sticky='ew')
+
     def check_client_id(self, event):
         """Check client's ID"""
         user_id = self.client_id.get()
@@ -406,6 +282,18 @@ class Application(tk.Tk):
         else:
             self.remove_button.configure(state='disabled')
 
+    def sort_client(self):
+        """Check button"""
+        sorted_attribute = self.sort_attribute.get()
+        if sorted_attribute is None:
+            self.sort_button.configure(state='disabled')
+        else:
+            temp_df = self.db.sort_value(sorted_attribute)
+            temp_string = temp_df.to_string(index=False)
+            self.data_show.delete('1.0', tk.END)
+            self.data_show.insert(tk.END, temp_string)
+            messagebox.showinfo(message="Success!")
+
     def remove_client(self):
         """Check button"""
         user_id = self.client_id.get()
@@ -413,10 +301,39 @@ class Application(tk.Tk):
             self.remove_button.configure(state='disabled')
         else:
             self.db.remove_client(user_id)
-            temp_df = pd.read_csv("test.csv")
-            temp_string = temp_df.to_string(index=False)
-            self.data_show.insert(tk.END, temp_string)
+            self.data_show.delete('1.0', tk.END)
+            self.data_show.insert(tk.END, self.df.to_string(index=False))
             messagebox.showinfo(message="Success!")
+
+    def sort_client_button(self):
+        """Initialize toplevel for sort client from database"""
+        sort_window = tk.Toplevel(self)
+        sort_window.title('Remove Client')
+        sort_window.configure(bg='white')
+        sort_window.rowconfigure(0, weight=1)
+        sort_window.columnconfigure(0, weight=1)
+        sort_frame = tk.Frame(sort_window)
+        sort_frame.configure(bg='white')
+        sort_frame.rowconfigure(0, weight=4)
+        sort_frame.rowconfigure(1, weight=1)
+        sort_frame.columnconfigure(0, weight=1)
+        sort_frame.columnconfigure(1, weight=2)
+        sort_frame.columnconfigure(2, weight=1)
+
+        self.client_id = tk.StringVar()
+        label = tk.Label(sort_frame, text="Press choose attribute you want to sort: ", bg='white')
+        self.sort_attribute = ttk.Combobox(sort_frame, values=self.df.columns.tolist())
+        self.sort_button = tk.Button(sort_frame, text='Sort', bg='white', state='disabled',
+                                       command=self.sort_client)
+        self.sort_attribute.bind('<<ComboboxSelected>>', self.sort_button.configure(state='normal'))
+        quit_button = tk.Button(sort_frame, text='Quit', command=sort_window.destroy, bg='white')
+
+        label.grid(row=0, column=0, **pad, sticky='nws')
+        self.sort_attribute.grid(row=0, column=1, **pad, sticky='news')
+        self.sort_button.grid(row=0, column=2, **pad, sticky='news')
+        quit_button.grid(row=1, column=2, **pad, sticky='news')
+
+        sort_frame.grid(row=0, column=0, **pad, sticky='news')
 
     def remove_client_button(self):
         """Initialize toplevel for remove client from database"""
@@ -471,9 +388,8 @@ class Application(tk.Tk):
         housing = self.housing_combobox.get()
         loan = self.loan_combobox.get()
         self.db.add_client(age, balance, previous, job, marital, edu, contact, poutcome, default, housing, loan)
-        temp_df = pd.read_csv("test.csv")
-        temp_string = temp_df.to_string(index=False)
-        self.data_show.insert(tk.END, temp_string)
+        self.data_show.delete('1.0', tk.END)
+        self.data_show.insert(tk.END, self.df.to_string(index=False))
         messagebox.showinfo(message="Success!")
 
     def check_entry(self, event):
@@ -667,14 +583,17 @@ class Application(tk.Tk):
             label_frame.columnconfigure(1, weight=1)
             label_frame.columnconfigure(2, weight=1)
             label_frame.columnconfigure(3, weight=1)
+            label_frame.columnconfigure(4, weight=1)
             button = tk.Button(master=label_frame, text='add client', fg='black', bg='white',
                                command=self.add_client_button)
             button2 = tk.Button(master=label_frame, text='remove client', fg='black', bg='white',
                                 command=self.remove_client_button)
             # button3 = tk.Button(master=label_frame, text='filter', fg='black', bg='white', command='')
+            button4 = tk.Button(master=label_frame, text='sort', fg='black', bg='white', command=self.sort_client_button)
             button.grid(row=0, column=1, **pad, sticky='news')
             button2.grid(row=0, column=2, **pad, sticky='news')
             # button3.grid(row=0, column=3, **pad, sticky='news')
+            button4.grid(row=0, column=4, **pad, sticky='news')
 
             self.data_show = scrolledtext.ScrolledText(master=self.database_frame, wrap=tk.NONE)
             dataframe_string = self.df.to_string(index=False)
